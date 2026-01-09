@@ -150,12 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let bookingPageLink = anchor.href;
     const parsed = new URL(bookingPageLink);
 
-    if (!parsed.hostname.endsWith('anywhere.com')) {
-      const invalidPath = parsed.pathname + parsed.search;
-      bookingPageLink =
-        'https://booking.anywhere.com' +
-        (invalidPath || '/invalidurl');
-    }
+    // if (!parsed.hostname.endsWith('anywhere.com')) {
+    //   const invalidPath = parsed.pathname + parsed.search;
+    //   bookingPageLink =
+    //     'https://booking.anywhere.com' +
+    //     (invalidPath || '/invalidurl');
+    // }
 
     anywherePopup(e, bookingPageLink);
   });
