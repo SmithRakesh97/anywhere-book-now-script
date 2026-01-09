@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href =
-    'https://assets.setmore.com/integration/websiteBooking/css/setmorePopupLive.css';
+    'https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css';
   document.head.appendChild(link);
 
   document.addEventListener('click', e => {
