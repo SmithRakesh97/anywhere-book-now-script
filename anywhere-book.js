@@ -1,11 +1,10 @@
 /* =========================================
    Anywhere Book-Now Popup — Final Plain JS
-   (jQuery-equivalent behavior)
    ========================================= */
 
 let isBookingPageLoaded = false;
 
-/* ---- jQuery show / hide emulation ---- */
+/* ---- show / hide emulation ---- */
 const displayCache = new Map();
 
 function hide(el) {
@@ -153,22 +152,18 @@ function anywherePopup(e, bookingPageLink) {
   }
 }
 
-const brandBookingMap = {
-  "anywhere.com": "https://booking.anywhere.com",
-  "setmore.com": "https://booking.setmore.com",
-  "inthechar.com": "https://booking.inthechar.com",
-};
+const ALLOWED_BRANDS = [
+  "anywhere.com",
+  "setmore.com",
+  "inthechar.com",
+  "serviceforge.com",
+];
 
-function getBookingBaseUrl(hostname) {
+function isAllowedBrand(hostname) {
   const host = hostname.toLowerCase();
-
-  for (const brand in brandBookingMap) {
-    if (host === brand || host.endsWith(`.${brand}`)) {
-      return brandBookingMap[brand];
-    }
-  }
-
-  return null; // not an allowed brand
+  return ALLOWED_BRANDS.some(
+    (domain) => host === domain || host.endsWith(`.${domain}`)
+  );
 }
 
 /* ---- DOM ready + delegated binding ---- */
@@ -186,16 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let bookingPageLink = anchor.href;
     const parsed = new URL(bookingPageLink);
 
-    const bookingBaseUrl = getBookingBaseUrl(parsed.hostname);
-
-    if (bookingBaseUrl) {
-      // allowed brand → redirect to its own booking domain
-      bookingPageLink = bookingBaseUrl + parsed.pathname + parsed.search;
-    } else {
-      // unknown brand → safe fallback
+    if (!isAllowedBrand(parsed.hostname)) {
+      const invalidPath = parsed.pathname + parsed.search;
       bookingPageLink =
-        "https://booking.anywhere.com" +
-        (parsed.pathname + parsed.search || "/invalidurl");
+        "https://booking.anywhere.com" + (invalidPath || "/invalidurl");
     }
     anywherePopup(e, bookingPageLink);
   });
