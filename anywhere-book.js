@@ -8,22 +8,22 @@ let isBookingPageLoaded = false;
 /* ---- jQuery show / hide emulation ---- */
 const displayCache = new Map();
 
-function jqHide(el) {
+function hide(el) {
   if (!displayCache.has(el)) {
     displayCache.set(el, getComputedStyle(el).display);
   }
   el.style.display = "none";
 }
 
-function jqShow(el) {
+function show(el) {
   const prev = displayCache.get(el);
   el.style.display = prev && prev !== "none" ? prev : "block";
 }
 
 /* ---- iframe load handler ---- */
 function initialFrameLoad() {
-  document.querySelectorAll(".iframe_loader").forEach(jqHide);
-  jqShow(document.getElementById("iframeContent"));
+  document.querySelectorAll(".iframe_loader").forEach(hide);
+  show(document.getElementById("iframeContent"));
 
   const fancyBox = document.getElementById("anywhere-fancy-box");
   const content = document.getElementById("anywhere-fancy-box-content");
@@ -79,8 +79,8 @@ function anywherePopup(e, bookingPageLink) {
   }
 
   function loadIframe() {
-    jqShow(document.querySelector(".iframe_loader"));
-    jqHide(document.getElementById("iframeContent"));
+    show(document.querySelector(".iframe_loader"));
+    hide(document.getElementById("iframeContent"));
 
     const iframeContent = document.getElementById("iframeContent");
     iframeContent.innerHTML = `
@@ -99,32 +99,38 @@ function anywherePopup(e, bookingPageLink) {
   }
 
   function positionPopup() {
+    const windowHeight = window.innerHeight;
+    const windowScrollHeight = document.documentElement.offsetHeight;
+    const windowScrollTop =
+      window.pageYOffset || document.documentElement.scrollTop;
+
     const popup = document.getElementById("anywhere-fancy-box");
     const overlay = document.getElementById("anywhere-overlay");
 
-    overlay.style.height = `${document.documentElement.scrollHeight}px`;
+    const popupWidth = popup.offsetWidth;
+    const popupHeight = windowHeight - 100;
 
-    const popupHeight = window.innerHeight - 100;
-    popup.style.marginLeft = `-${popup.offsetWidth / 2}px`;
-    popup.style.marginTop = `${
-      (window.innerHeight - popupHeight) / 2 + window.scrollY
-    }px`;
+    overlay.style.height = windowScrollHeight + "px";
+
+    popup.style.marginLeft = "-" + popupWidth / 2 + "px";
+    popup.style.marginTop =
+      (windowHeight - popupHeight) / 2 + windowScrollTop + "px";
 
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
   }
 
   function hidePopup() {
-    jqHide(document.getElementById("anywhere-overlay"));
-    jqHide(document.getElementById("anywhere-fancy-box"));
+    hide(document.getElementById("anywhere-overlay"));
+    hide(document.getElementById("anywhere-fancy-box"));
 
     document.documentElement.style.overflow = "auto";
     document.body.style.overflow = "auto";
   }
 
   function showPopup() {
-    jqShow(document.getElementById("anywhere-overlay"));
-    jqShow(document.getElementById("anywhere-fancy-box"));
+    show(document.getElementById("anywhere-overlay"));
+    show(document.getElementById("anywhere-fancy-box"));
   }
 
   document.addEventListener("click", (evt) => {
@@ -147,6 +153,24 @@ function anywherePopup(e, bookingPageLink) {
   }
 }
 
+const brandBookingMap = {
+  "anywhere.com": "https://booking.anywhere.com",
+  "setmore.com": "https://booking.setmore.com",
+  "inthechar.com": "https://booking.inthechar.com",
+};
+
+function getBookingBaseUrl(hostname) {
+  const host = hostname.toLowerCase();
+
+  for (const brand in brandBookingMap) {
+    if (host === brand || host.endsWith(`.${brand}`)) {
+      return brandBookingMap[brand];
+    }
+  }
+
+  return null; // not an allowed brand
+}
+
 /* ---- DOM ready + delegated binding ---- */
 document.addEventListener("DOMContentLoaded", () => {
   const link = document.createElement("link");
@@ -162,12 +186,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let bookingPageLink = anchor.href;
     const parsed = new URL(bookingPageLink);
 
-    // if (!parsed.hostname.endsWith("anywhere.com")) {
-    //   const invalidPath = parsed.pathname + parsed.search;
-    //   bookingPageLink =
-    //     "https://booking.anywhere.com" + (invalidPath || "/invalidurl");
-    // }
+    const bookingBaseUrl = getBookingBaseUrl(parsed.hostname);
 
+    if (bookingBaseUrl) {
+      // allowed brand → redirect to its own booking domain
+      bookingPageLink = bookingBaseUrl + parsed.pathname + parsed.search;
+    } else {
+      // unknown brand → safe fallback
+      bookingPageLink =
+        "https://booking.anywhere.com" +
+        (parsed.pathname + parsed.search || "/invalidurl");
+    }
     anywherePopup(e, bookingPageLink);
   });
 });
