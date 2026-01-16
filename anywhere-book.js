@@ -1,11 +1,18 @@
 /* =========================================
-   Anywhere Book-Now Popup — Final Plain JS
+   Anywhere Book-Now Popup — Optimized JS
    ========================================= */
 
 let isBookingPageLoaded = false;
+let popupEls = null;
+let globalClickBound = false;
+
+/* ---- constants ---- */
+const POPUP_WIDTH = 545;
+const POPUP_PADDING = 100;
+const MAX_IFRAME_HEIGHT = 635;
 
 /* ---- show / hide emulation ---- */
-const displayCache = new Map();
+const displayCache = new WeakMap();
 
 function hide(el) {
   if (!displayCache.has(el)) {
@@ -15,143 +22,127 @@ function hide(el) {
 }
 
 function show(el) {
-  const prev = displayCache.get(el);
-  el.style.display = prev && prev !== "none" ? prev : "block";
+  el.style.display = displayCache.get(el) || "block";
 }
 
 /* ---- iframe load handler ---- */
 function initialFrameLoad() {
-  document.querySelectorAll(".iframe_loader").forEach(hide);
-  show(document.getElementById("iframeContent"));
-
-  const fancyBox = document.getElementById("anywhere-fancy-box");
-  const content = document.getElementById("anywhere-fancy-box-content");
+  hide(popupEls.loader);
+  show(popupEls.iframeWrap);
 
   const iframeWindowHeight = window.innerHeight;
-  const fancyBoxHeight = fancyBox.offsetHeight;
+  const fancyBoxHeight = popupEls.popup.offsetHeight;
 
-  content.style.height =
+  popupEls.content.style.height =
     iframeWindowHeight > fancyBoxHeight
-      ? "635px"
+      ? `${MAX_IFRAME_HEIGHT}px`
       : `${iframeWindowHeight - 50}px`;
+}
+
+/* ---- popup creation ---- */
+function renderTemplate() {
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
+    <div id="anywhere-overlay"></div>
+
+    <div id="anywhere-fancy-box">
+      <button id="anywhere-fancy-box-close-icon">✕</button>
+      <div id="anywhere-fancy-box-content">
+        <div class="iframe_loader"></div>
+        <div id="iframeContent"></div>
+      </div>
+    </div>
+    `
+  );
+
+  popupEls = {
+    overlay: document.getElementById("anywhere-overlay"),
+    popup: document.getElementById("anywhere-fancy-box"),
+    content: document.getElementById("anywhere-fancy-box-content"),
+    iframeWrap: document.getElementById("iframeContent"),
+    loader: document.querySelector(".iframe_loader"),
+  };
+
+  popupEls.iframe = document.createElement("iframe");
+  popupEls.iframe.id = "anywhere-fancy-box-iframe";
+  popupEls.iframe.allow = "web-share; payment";
+  popupEls.iframe.frameBorder = "0";
+  popupEls.iframe.scrolling = "auto";
+  popupEls.iframe.onload = initialFrameLoad;
+
+  popupEls.iframeWrap.appendChild(popupEls.iframe);
+}
+
+/* ---- iframe handling ---- */
+function loadIframe(src) {
+  show(popupEls.loader);
+  hide(popupEls.iframeWrap);
+  popupEls.iframe.src = src;
+}
+
+/* ---- positioning ---- */
+function positionPopup() {
+  const scrollTop = window.pageYOffset;
+  const windowHeight = window.innerHeight;
+
+  popupEls.overlay.style.height =
+    document.documentElement.offsetHeight + "px";
+
+  popupEls.popup.style.marginLeft = `-${POPUP_WIDTH / 2}px`;
+  popupEls.popup.style.marginTop =
+    (windowHeight - (windowHeight - POPUP_PADDING)) / 2 + scrollTop + "px";
+
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+}
+
+/* ---- show / hide ---- */
+function hidePopup() {
+  hide(popupEls.overlay);
+  hide(popupEls.popup);
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
+
+function showPopup() {
+  show(popupEls.overlay);
+  show(popupEls.popup);
 }
 
 /* ---- main popup ---- */
 function anywherePopup(e, bookingPageLink) {
   e.preventDefault();
-  e.stopPropagation();
-  if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+  e.stopImmediatePropagation();
 
   if (window.innerWidth < 600) {
     window.open(bookingPageLink, "_blank");
     return;
   }
 
-  const overlayHTML = `<div id="anywhere-overlay"></div>`;
-  const popupHTML = `
-    <div id="anywhere-fancy-box"
-      style="background:#fff;height:auto;left:50%;position:absolute;top:0;width:545px;z-index:9999;">
-      <button id="anywhere-fancy-box-close-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="11" viewBox="0 0 12 11" fill="none"><path d="M1.3335 0.674316L10.6668 10.0076" stroke="#EFF3F9" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.6668 0.674316L1.3335 10.0076" stroke="#EFF3F9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div id="anywhere-fancy-box-content">
-        <div class="int-loader-wrap iframe_loader">
-            <div aria-hidden="true" id=":ri:" role="img" style="width:48px; height:48px; stroke-width:1; position:relative;" data-eds-component="true">
-                <svg aria-hidden="true" data-eds-component="true" fill-rule="evenodd" focusable="false" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" style="height:20px; width:20px; fill: #111111; position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1);">
-                <path d="M210.833 216.666h-.583c0 64.948-38.039 140-116.084 140v-64.167c96.084.056 116.667-69.133 116.667-110.833V100h-.583c0 64.948-38.039 140-116.084 140v-64.167C190.25 175.889 210.834 106.7 210.834 65h58.334c0 41.7 20.582 110.889 116.666 110.833V240c-78.044 0-116.083-75.052-116.083-140h-.583v81.666c0 41.7 20.582 110.889 116.666 110.833v64.167c-78.044 0-116.083-75.052-116.083-140h-.583v198.333h-58.334V216.666z"></path>
-                </svg>
-
-                <svg fill="none" focusable="false" preserveAspectRatio="xMidYMid meet" viewBox="0 0 50 50" class="animate-loading-spin block">
-                <circle cx="25" cy="25" r="20" stroke-linecap="round" style="stroke:#111111;" class="animate-loading-dash"></circle>
-                </svg>
-            </div>
-        </div>
-        <div id="iframeContent" style="height:100%;width:100%"></div>
-      </div>
-    </div>
-  `;
-
-  function renderTemplate() {
-    document.body.insertAdjacentHTML("beforeend", overlayHTML + popupHTML);
-    positionPopup();
-    loadIframe();
-  }
-
-  function loadIframe() {
-    show(document.querySelector(".iframe_loader"));
-    hide(document.getElementById("iframeContent"));
-
-    const iframeContent = document.getElementById("iframeContent");
-    iframeContent.innerHTML = `
-      <iframe
-        allow="web-share; payment"
-        id="anywhere-fancy-box-iframe"
-        frameborder="0"
-        hspace="0"
-        scrolling="auto"
-        src="${bookingPageLink}">
-      </iframe>
-    `;
-
-    document.getElementById("anywhere-fancy-box-iframe").onload =
-      initialFrameLoad;
-  }
-
-  function positionPopup() {
-    const windowHeight = window.innerHeight;
-    const windowScrollHeight = document.documentElement.offsetHeight;
-    const windowScrollTop =
-      window.pageYOffset || document.documentElement.scrollTop;
-
-    const popup = document.getElementById("anywhere-fancy-box");
-    const overlay = document.getElementById("anywhere-overlay");
-
-    const popupWidth = popup.offsetWidth;
-    const popupHeight = windowHeight - 100;
-
-    overlay.style.height = windowScrollHeight + "px";
-
-    popup.style.marginLeft = "-" + popupWidth / 2 + "px";
-    popup.style.marginTop =
-      (windowHeight - popupHeight) / 2 + windowScrollTop + "px";
-
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-  }
-
-  function hidePopup() {
-    hide(document.getElementById("anywhere-overlay"));
-    hide(document.getElementById("anywhere-fancy-box"));
-
-    document.documentElement.style.overflow = "auto";
-    document.body.style.overflow = "auto";
-  }
-
-  function showPopup() {
-    show(document.getElementById("anywhere-overlay"));
-    show(document.getElementById("anywhere-fancy-box"));
-  }
-
-  document.addEventListener("click", (evt) => {
-    const target = evt.target;
-    if (
-      target.closest("#anywhere-overlay") ||
-      target.closest("#anywhere-fancy-box-close-icon")
-    ) {
-      hidePopup();
-    }
-  });
-
   if (!isBookingPageLoaded) {
     isBookingPageLoaded = true;
     renderTemplate();
-  } else {
-    loadIframe();
-    positionPopup();
-    showPopup();
+  }
+
+  loadIframe(bookingPageLink);
+  positionPopup();
+  showPopup();
+
+  if (!globalClickBound) {
+    globalClickBound = true;
+    document.addEventListener("click", (evt) => {
+      if (
+        evt.target.closest("#anywhere-overlay") ||
+        evt.target.closest("#anywhere-fancy-box-close-icon")
+      ) {
+        hidePopup();
+      }
+    });
   }
 }
 
+/* ---- brand safety ---- */
 const ALLOWED_BRANDS = [
   "anywhere.com",
   "setmore.com",
@@ -160,32 +151,29 @@ const ALLOWED_BRANDS = [
 ];
 
 function isAllowedBrand(hostname) {
-  const host = hostname.toLowerCase();
   return ALLOWED_BRANDS.some(
-    (domain) => host === domain || host.endsWith(`.${domain}`)
+    (d) => hostname === d || hostname.endsWith("." + d)
   );
 }
 
-/* ---- DOM ready + delegated binding ---- */
+/* ---- DOM ready ---- */
 document.addEventListener("DOMContentLoaded", () => {
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href =
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href =
     "https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css";
-  document.head.appendChild(link);
+  document.head.appendChild(css);
 
   document.addEventListener("click", (e) => {
     const anchor = e.target.closest("#Anywhere_button_iframe");
     if (!anchor) return;
 
-    let bookingPageLink = anchor.href;
-    const parsed = new URL(bookingPageLink);
+    const url = new URL(anchor.href);
+    const safeUrl = isAllowedBrand(url.hostname)
+      ? anchor.href
+      : "https://booking.anywhere.com" +
+        (url.pathname + url.search || "/invalidurl");
 
-    if (!isAllowedBrand(parsed.hostname)) {
-      const invalidPath = parsed.pathname + parsed.search;
-      bookingPageLink =
-        "https://booking.anywhere.com" + (invalidPath || "/invalidurl");
-    }
-    anywherePopup(e, bookingPageLink);
+    anywherePopup(e, safeUrl);
   });
 });
