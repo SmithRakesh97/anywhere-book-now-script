@@ -119,7 +119,7 @@
     const trigger = document.getElementById("Anywhere_button_iframe");
 
     if (trigger) {
-      const bookingPageLink = trigger.getAttribute("href");
+      const bookingPageLink = trigger.dataset.bookingUrl;;
 
       trigger.addEventListener("click", () => {
         const windowWidth = window.innerWidth;
