@@ -117,10 +117,19 @@
     document.head.appendChild(link);
 
     const trigger = document.getElementById("Anywhere_button_iframe");
+
     if (trigger) {
-      let bookingPageLink = trigger.href;
-      // Validate URL logic and redirect to respective brand booking page if invalid
-      trigger.addEventListener("click", () => openPopup(bookingPageLink));
+      const bookingPageLink = trigger.getAttribute("href");
+
+      trigger.addEventListener("click", () => {
+        const windowWidth = window.innerWidth;
+
+        if (windowWidth < 600) {
+          window.open(bookingPageLink, "_blank", "noopener");
+          return;
+        }
+        openPopup(bookingPageLink);
+      });
     }
   });
 })();
