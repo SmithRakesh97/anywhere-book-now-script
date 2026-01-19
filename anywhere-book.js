@@ -1,6 +1,4 @@
 (function () {
-  const IFRAME_URL = "https://containertest2512.setmore.com/"; // change this
-
   let popupOverlay = null;
   let iframeLoaded = false;
 
@@ -11,7 +9,7 @@
     </svg>
   `;
 
-const LOADER_SVG = `
+  const LOADER_SVG = `
   <div style="
     position: relative;
     width: 50px;
@@ -42,7 +40,7 @@ const LOADER_SVG = `
       style="
         width:50px;
         height:50px;
-        animation: popupSpin 1s linear infinite;
+        animation: anywhereSpin 1s linear infinite;
       ">
       <circle
         cx="25"
@@ -59,26 +57,25 @@ const LOADER_SVG = `
   </div>
 `;
 
-
-  function createPopup() {
+  function createPopup(bookingPageLink) {
     const overlay = document.createElement("div");
-    overlay.className = "popup-overlay";
+    overlay.className = "anywhere-overlay";
     overlay.style.display = "none";
 
     const box = document.createElement("div");
-    box.className = "popup-box";
+    box.className = "anywhere-box";
 
     const closeBtn = document.createElement("div");
-    closeBtn.className = "popup-close";
+    closeBtn.className = "anywhere-close";
     closeBtn.innerHTML = CLOSE_ICON_SVG;
 
     const loader = document.createElement("div");
-    loader.className = "popup-loader";
+    loader.className = "anywhere-loader";
     loader.innerHTML = LOADER_SVG;
 
     const iframe = document.createElement("iframe");
-    iframe.className = "popup-iframe";
-    iframe.src = IFRAME_URL;
+    iframe.className = "anywhere-iframe";
+    iframe.src = bookingPageLink;
 
     iframe.onload = () => {
       iframeLoaded = true;
@@ -104,18 +101,26 @@ const LOADER_SVG = `
     return overlay;
   }
 
-  function openPopup() {
+  function openPopup(bookingPageLink) {
     if (!popupOverlay) {
-      popupOverlay = createPopup();
+      popupOverlay = createPopup(bookingPageLink);
     }
 
     popupOverlay.style.display = "flex";
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const trigger = document.getElementById("openPopup");
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css";
+    document.head.appendChild(link);
+
+    const trigger = document.getElementById("Anywhere_button_iframe");
     if (trigger) {
-      trigger.addEventListener("click", openPopup);
+      let bookingPageLink = trigger.href;
+      // Validate URL logic and redirect to respective brand booking page if invalid
+      trigger.addEventListener("click", () => openPopup(bookingPageLink));
     }
   });
 })();
