@@ -1,5 +1,8 @@
 (function () {
-  const IFRAME_URL = "https://containertest2512.setmore.com"; // change this
+  const IFRAME_URL = "https://containertest2512.setmore.com/"; // change this
+
+  let popupOverlay = null;
+  let iframeLoaded = false;
 
   const CLOSE_ICON_SVG = `
     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="11" viewBox="0 0 12 11" fill="none">
@@ -8,28 +11,59 @@
     </svg>
   `;
 
-  const LOADER_SVG = `
-    <div style="position: relative; width: 50px; height: 50px;">
-      <svg aria-hidden="true" fill-rule="evenodd" preserveAspectRatio="xMidYMid meet"
-        viewBox="0 0 480 480"
-        style="height:20px;width:20px;fill:#111111;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">
-        <path d="M210.833 216.666h-.583c0 64.948-38.039 140-116.084 140v-64.167c96.084.056 116.667-69.133 116.667-110.833V100h-.583c0 64.948-38.039 140-116.084 140v-64.167C190.25 175.889 210.834 106.7 210.834 65h58.334c0 41.7 20.582 110.889 116.666 110.833V240c-78.044 0-116.083-75.052-116.083-140h-.583v81.666c0 41.7 20.582 110.889 116.666 110.833v64.167c-78.044 0-116.083-75.052-116.083-140h-.583v198.333h-58.334V216.666z"/>
-      </svg>
+const LOADER_SVG = `
+  <div style="
+    position: relative;
+    width: 50px;
+    height: 50px;
+  ">
+    <!-- Center Icon -->
+    <svg aria-hidden="true"
+      fill-rule="evenodd"
+      preserveAspectRatio="xMidYMid meet"
+      viewBox="0 0 480 480"
+      xmlns="http://www.w3.org/2000/svg"
+      style="
+        height:20px;
+        width:20px;
+        fill:#111111;
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+      ">
+      <path d="M210.833 216.666h-.583c0 64.948-38.039 140-116.084 140v-64.167c96.084.056 116.667-69.133 116.667-110.833V100h-.583c0 64.948-38.039 140-116.084 140v-64.167C190.25 175.889 210.834 106.7 210.834 65h58.334c0 41.7 20.582 110.889 116.666 110.833V240c-78.044 0-116.083-75.052-116.083-140h-.583v81.666c0 41.7 20.582 110.889 116.666 110.833v64.167c-78.044 0-116.083-75.052-116.083-140h-.583v198.333h-58.334V216.666z"></path>
+    </svg>
 
-      <svg fill="none" preserveAspectRatio="xMidYMid meet"
-        viewBox="0 0 50 50"
-        class="animate-loading-spin block"
-        style="width:50px;height:50px;">
-        <circle cx="25" cy="25" r="20" stroke-linecap="round"
-          style="stroke:#111111;stroke-width:4"
-          class="animate-loading-dash"></circle>
-      </svg>
-    </div>
-  `;
+    <!-- Spinning Circle -->
+    <svg
+      viewBox="0 0 50 50"
+      xmlns="http://www.w3.org/2000/svg"
+      style="
+        width:50px;
+        height:50px;
+        animation: popupSpin 1s linear infinite;
+      ">
+      <circle
+        cx="25"
+        cy="25"
+        r="20"
+        fill="none"
+        stroke="#111111"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-dasharray="90"
+        stroke-dashoffset="60"
+      />
+    </svg>
+  </div>
+`;
 
-  function openPopup() {
+
+  function createPopup() {
     const overlay = document.createElement("div");
     overlay.className = "popup-overlay";
+    overlay.style.display = "none";
 
     const box = document.createElement("div");
     box.className = "popup-box";
@@ -47,17 +81,18 @@
     iframe.src = IFRAME_URL;
 
     iframe.onload = () => {
+      iframeLoaded = true;
       loader.style.display = "none";
       iframe.style.display = "block";
     };
 
-    function closePopup() {
-      document.body.removeChild(overlay);
+    function hidePopup() {
+      overlay.style.display = "none";
     }
 
-    closeBtn.addEventListener("click", closePopup);
+    closeBtn.addEventListener("click", hidePopup);
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closePopup();
+      if (e.target === overlay) hidePopup();
     });
 
     box.appendChild(closeBtn);
@@ -65,6 +100,16 @@
     box.appendChild(iframe);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
+
+    return overlay;
+  }
+
+  function openPopup() {
+    if (!popupOverlay) {
+      popupOverlay = createPopup();
+    }
+
+    popupOverlay.style.display = "flex";
   }
 
   document.addEventListener("DOMContentLoaded", () => {
