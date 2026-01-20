@@ -48,7 +48,7 @@
         r="20"
         fill="none"
         stroke="#111111"
-        stroke-width="4"
+        stroke-width="1"
         stroke-linecap="round"
         stroke-dasharray="90"
         stroke-dashoffset="60"
