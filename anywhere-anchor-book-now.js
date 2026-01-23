@@ -1,15 +1,15 @@
 (function () {
-  let popupOverlay = null;
-  let iframeLoaded = false;
+	let popupOverlay = null;
+	let iframeLoaded = false;
 
-  const CLOSE_ICON_SVG = `
+	const CLOSE_ICON_SVG = `
     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="11" viewBox="0 0 12 11" fill="none">
       <path d="M1.3335 0.674316L10.6668 10.0076" stroke="#EFF3F9" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M10.6668 0.674316L1.3335 10.0076" stroke="#EFF3F9" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   `;
 
-  const LOADER_SVG = `
+	const LOADER_SVG = `
 <div style="position: relative; width: 50px; height: 50px;">
   <!-- Center Icon -->
   <svg
@@ -59,81 +59,82 @@
 
 `;
 
-  function createPopup(bookingPageLink) {
-    const overlay = document.createElement("div");
-    overlay.className = "anywhere-overlay";
-    overlay.style.display = "none";
+	function createPopup(bookingPageLink) {
+		const overlay = document.createElement('div');
+		overlay.className = 'anywhere-overlay';
+		overlay.style.display = 'none';
 
-    const box = document.createElement("div");
-    box.className = "anywhere-box";
+		const box = document.createElement('div');
+		box.className = 'anywhere-box';
 
-    const closeBtn = document.createElement("div");
-    closeBtn.className = "anywhere-close";
-    closeBtn.innerHTML = CLOSE_ICON_SVG;
+		const closeBtn = document.createElement('div');
+		closeBtn.className = 'anywhere-close';
+		closeBtn.innerHTML = CLOSE_ICON_SVG;
 
-    const loader = document.createElement("div");
-    loader.className = "anywhere-loader";
-    loader.innerHTML = LOADER_SVG;
+		const loader = document.createElement('div');
+		loader.className = 'anywhere-loader';
+		loader.innerHTML = LOADER_SVG;
 
-    const iframe = document.createElement("iframe");
-    iframe.className = "anywhere-iframe";
-    iframe.src = bookingPageLink;
+		const iframe = document.createElement('iframe');
+		iframe.className = 'anywhere-iframe';
+		iframe.src = bookingPageLink;
 
-    iframe.onload = () => {
-      iframeLoaded = true;
-      loader.style.display = "none";
-      iframe.style.display = "block";
-    };
+		iframe.onload = () => {
+			iframeLoaded = true;
+			loader.style.display = 'none';
+			iframe.style.display = 'block';
+		};
 
-    function hidePopup() {
-      overlay.style.display = "none";
-    }
+		function hidePopup() {
+			overlay.style.display = 'none';
+		}
 
-    closeBtn.addEventListener("click", hidePopup);
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) hidePopup();
-    });
+		closeBtn.addEventListener('click', hidePopup);
+		overlay.addEventListener('click', (e) => {
+			if (e.target === overlay) hidePopup();
+		});
 
-    box.appendChild(closeBtn);
-    box.appendChild(loader);
-    box.appendChild(iframe);
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
+		box.appendChild(closeBtn);
+		box.appendChild(loader);
+		box.appendChild(iframe);
+		overlay.appendChild(box);
+		document.body.appendChild(overlay);
 
-    return overlay;
-  }
+		return overlay;
+	}
 
-  function openPopup(bookingPageLink) {
-    if (!popupOverlay) {
-      popupOverlay = createPopup(bookingPageLink);
-    }
+	function openPopup(bookingPageLink) {
+		if (!popupOverlay) {
+			popupOverlay = createPopup(bookingPageLink);
+		}
 
-    popupOverlay.style.display = "flex";
-  }
+		popupOverlay.style.display = 'flex';
+	}
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href =
-      "https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css";
-    document.head.appendChild(link);
+	document.addEventListener('DOMContentLoaded', () => {
+		const link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.href = 'https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css';
+		document.head.appendChild(link);
 
-    const triggers = document.querySelectorAll("#Anywhere_button_iframe");
-    triggers.forEach(trigger => {
-    if (trigger) {
-      const bookingPageLink = trigger.href;;
+		const triggers = document.querySelectorAll('#Anywhere_button_iframe');
+		triggers.forEach((trigger) => {
+			if (trigger) {
+				const bookingPageLink = trigger.dataset.bookingUrl;
+				const newTabAttr = trigger.dataset.newTab === 'true'; // convert to boolean
 
-      trigger.addEventListener("click", (e) => {
-        e.preventDefault(); // prevent default navigation
-        const windowWidth = window.innerWidth;
+				trigger.addEventListener('click', () => {
+					const windowWidth = window.innerWidth;
 
-        if (windowWidth < 600) {
-          window.open(bookingPageLink, "_blank", "noopener");
-          return;
-        }
-        openPopup(bookingPageLink);
-      });
-    }
-    });
-  });
+					if (newTabAttr || windowWidth < 600) {
+						// Open in a new tab if data-new-tab=true OR small screen
+
+						window.open(bookingPageLink, '_blank', 'noopener');
+						return;
+					}
+					openPopup(bookingPageLink);
+				});
+			}
+		});
+	});
 })();
