@@ -123,7 +123,7 @@
     if (trigger) {
       const bookingPageLink = trigger.href;;
 
-      trigger.addEventListener("click", () => {
+      trigger.addEventListener("click", (e) => {
         e.preventDefault(); // prevent default navigation
         const windowWidth = window.innerWidth;
 
