@@ -118,7 +118,7 @@
       "https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css";
     document.head.appendChild(link);
 
-    const triggers = document.querySelectorAll("Anywhere_button_iframe");
+    const triggers = document.querySelectorAll("#Anywhere_button_iframe");
     triggers.forEach(trigger => {
     if (trigger) {
       const bookingPageLink = trigger.getAttribute("href");;
