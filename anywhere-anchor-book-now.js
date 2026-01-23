@@ -121,7 +121,7 @@
     const triggers = document.querySelectorAll("#Anywhere_button_iframe");
     triggers.forEach(trigger => {
     if (trigger) {
-      const bookingPageLink = trigger.getAttribute("href");;
+      const bookingPageLink = trigger.href;;
 
       trigger.addEventListener("click", () => {
         e.preventDefault(); // prevent default navigation
