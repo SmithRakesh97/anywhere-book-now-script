@@ -112,6 +112,9 @@
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
+		  if (document.querySelector('.anywhere-book-now-button')) {
+    		document.body.classList.add('anywhere-active');
+  		  }
 		const link = document.createElement('link');
 		link.rel = 'stylesheet';
 		link.href = 'https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css';
