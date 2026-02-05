@@ -146,7 +146,8 @@
 		}
 		const link = document.createElement('link');
 		link.rel = 'stylesheet';
-		link.href = 'https://smithrakesh97.github.io/anywhere-book-now-css/anywhere-book-now.css';
+		link.href =
+			'https://assets.serviceforge.com/integration/book-now/staging/v1/anywhere-book-now.css';
 		document.head.appendChild(link);
 
 		const triggers = document.querySelectorAll('#Anywhere_button_iframe');
