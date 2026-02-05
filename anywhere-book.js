@@ -141,20 +141,29 @@
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
-		if (document.querySelector('.anywhere-book-now-button')) {
+		const brands = ['serviceforge', 'setmore'];
+		const anyWhereButton = document.querySelector('.anywhere-book-now-button');
+		let brand = 'setmore'; // default brand
+		if (anyWhereButton) {
 			document.body.classList.add('anywhere-active');
+			const bookingUrl = anyWhereButton.dataset.bookingUrl;
+			try {
+				const hostname = new URL(bookingUrl).hostname;
+				brand = brands.find((brandName) => hostname.includes(brandName)) || 'setmore';
+			} catch {
+				brand = 'setmore';
+			}
 		}
 		const link = document.createElement('link');
 		link.rel = 'stylesheet';
-		link.href =
-			'https://assets.setmore.com/integration/book-now/staging/v1/anywhere-book-now.css';
+		link.href = `https://assets.${brand}.com/integration/book-now/staging/v1/anywhere-book-now.css`;
 		document.head.appendChild(link);
 
-		const triggers = document.querySelectorAll('#Anywhere_button_iframe');
+		const triggers = document.querySelectorAll('.anywhere-book-now-button');
 		triggers.forEach((trigger) => {
 			if (trigger) {
-				const bookingPageLink = trigger.dataset.bookingUrl;
-				const newTabAttr = trigger.dataset.newTab === 'true'; // convert to boolean
+				const bookingPageLink = trigger?.dataset?.bookingUrl;
+				const newTabAttr = trigger?.dataset?.newTab === 'true'; // convert to boolean
 
 				trigger.addEventListener('click', () => {
 					const windowWidth = window.innerWidth;
