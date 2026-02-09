@@ -156,7 +156,7 @@
 		}
 		const link = document.createElement('link');
 		link.rel = 'stylesheet';
-		link.href = `https://assets.${brand}.com/integration/book-now/staging/v1/anywhere-book-now.css`;
+		link.href = `https://assets.${brand}.com/integration/book-now/live/v1/anywhere-book-now.css`;
 		document.head.appendChild(link);
 
 		const triggers = document.querySelectorAll('.anywhere-book-now-button');
