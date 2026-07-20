@@ -1,4 +1,5 @@
 (function () {
+	// Custom script to always open the booking popup in the same tab when the "Book Now" button is clicked.
 	let popupOverlay = null;
 	let iframeLoaded = false;
 
